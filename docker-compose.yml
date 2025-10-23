@@ -1,0 +1,42 @@
+services:
+  gateway:
+    build: ./Gateway
+    environment:
+      - ASPNETCORE_URLS=http://+:5000
+    ports:
+      - "8080:5000"
+    # depends_on:
+    #   - authservice
+
+  authservice:
+      build:
+        context: ./AuthMicroservice
+        dockerfile: DockerfileAuth
+      deploy:
+        replicas: 2
+      environment:
+        - ASPNETCORE_URLS=http://+:5001
+        - ConnectionStrings__Default=server=usersdb;port=3306;user=root;password=root;database=usersdb
+      depends_on:
+        - usersdb
+    
+  productservice:
+      build:
+        context: ./ProductMicroservice
+        dockerfile: DockerfileProduct
+      deploy:
+        replicas: 2
+      environment:
+        - ASPNETCORE_URLS=http://+:5002
+        - ConnectionStrings__Default=server=usersdb;port=3306;user=root;password=root;database=usersdb
+      depends_on:
+       - usersdb
+  
+  usersdb:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: usersdb
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
