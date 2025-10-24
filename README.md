@@ -74,7 +74,7 @@ Dette er fordi metoden i API’en bruger `[HttpGet("{id}")]`.
 Derfor skal id angives direkte i URL’en, i stedet for som en parameter, f.eks.: `http://localhost:8080/api/product/get?id=1`
 
 ## Get/Pages
-I dette system kan du hente produkter til en side med: `api/product/get/pages?page=1&pageSize=20&category=""`.  
+I dette system kan du hente produkter til en side med: `api/product/get/pages?page=1&pageSize=20&category=`.  
 
 Metoden skal igen sættes til **GET**.
 
