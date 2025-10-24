@@ -19,7 +19,9 @@ For at bruge dette system skal du anvende **Postman**, da der ikke er noget UI t
 # AuthMicroservice
 
 **AuthMicroservice** bruges til at håndtere alt, der vedrører brugere og godkendelse af logins.  
-Den står for oprettelse af nye brugere og validering af brugeroplysninger ved login.
+Den står for oprettelse af nye brugere og validering af brugeroplysninger ved login.  
+
+Grunden til, at der bruges **user** i kaldene til **Register** og **Login**, er, at controlleren hedder UserController.
 
 ## Register
 
