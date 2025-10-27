@@ -5,8 +5,6 @@ services:
       - ASPNETCORE_URLS=http://+:5000
     ports:
       - "8080:5000"
-    # depends_on:
-    #   - authservice
 
   authservice:
       build:
@@ -30,7 +28,19 @@ services:
         - ASPNETCORE_URLS=http://+:5002
         - ConnectionStrings__Default=server=usersdb;port=3306;user=root;password=root;database=usersdb
       depends_on:
-       - usersdb
+        - usersdb
+  
+  orderservice:
+       build:
+         context: ./OrderMicroservice
+         dockerfile: DockerfileOrder
+       deploy:
+           replicas: 1
+       environment:
+         - ASPNETCORE_URLS=http://+:5003
+         - ConnectionStrings__Default=server=usersdb;port=3306;user=root;password=root;database=usersdb
+       depends_on:
+          - usersdb
   
   usersdb:
     image: mysql:8.0

@@ -34,6 +34,7 @@ namespace Application.Product.Services
             product.ProductDescription = request.ProductDescription;
             product.ProductCategory = request.ProductCategory;
             product.ProductPrice = request.ProductPrice;
+            product.ProductQuantity = request.ProductQuantity;
             product.ProductImageUrl = request.ProductImageUrl;
 
             var createdProduct = await _productRepository.AddProductAsync(product);

@@ -1,0 +1,29 @@
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+WORKDIR /app
+EXPOSE 5003
+ENV ASPNETCORE_URLS=http://+:5003
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src
+
+COPY ["API.Order/API.Order.csproj", "API.Order/"]
+COPY ["Application.Order/Application.Order.csproj", "Application.Order/"]
+COPY ["Domain.Order/Domain.Order.csproj", "Domain.Order/"]
+COPY ["Persistence.Order/Persistence.Order.csproj", "Persistence.Order/"]
+
+RUN dotnet restore "API.Order/API.Order.csproj"
+
+COPY . .
+
+WORKDIR "/src/API.Order"
+RUN dotnet build "API.Order.csproj" -c $BUILD_CONFIGURATION -o /app/build
+
+FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "API.Order.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "API.Order.dll"]

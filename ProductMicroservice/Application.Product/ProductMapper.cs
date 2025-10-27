@@ -22,6 +22,7 @@ namespace Application.Product
                 ProductDescription = product.ProductDescription,
                 ProductCategory = product.ProductCategory,
                 ProductPrice = product.ProductPrice,
+                ProductQuantity = product.ProductQuantity,
                 ProductImageUrl = product.ProductImageUrl
             };
         }
