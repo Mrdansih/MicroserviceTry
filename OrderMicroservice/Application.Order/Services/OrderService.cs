@@ -2,12 +2,7 @@
 using Application.Order.ServiceInterfaces;
 using Confluent.Kafka;
 using Domain.Order.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace Application.Order.Services
 {
@@ -33,13 +28,19 @@ namespace Application.Order.Services
 
             var createdOrder = await _orderRepository.AddNewOrderAsync(order);
 
-            await _eventPublisher.ProduceAsync("order-topic", new Message<string, string>
-            {
-                Key = createdOrder.Id.ToString(),
-                Value = JsonSerializer.Serialize(createdOrder)
-            });
+            if (createdOrder != null)
+                await OrderProduceAsync(createdOrder);
 
             return createdOrder;
+        }
+
+        public async Task OrderProduceAsync(OrderEntity order)
+        {
+            await _eventPublisher.ProduceAsync("order-topic", new Message<string, string>
+            {
+                Key = order.Id.ToString(),
+                Value = JsonSerializer.Serialize(order)
+            });
         }
     }
 }

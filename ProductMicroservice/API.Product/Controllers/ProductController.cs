@@ -1,6 +1,5 @@
 ﻿using Application.Product.ServiceInterfaces;
 using Domain.Product.ProductModels;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Product.Controllers

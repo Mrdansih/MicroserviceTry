@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Domain.Order.Models
+﻿namespace Domain.Order.Models
 {
     public class OrderDto
     {

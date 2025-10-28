@@ -1,14 +1,10 @@
 ﻿using Domain.Order.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Order.ServiceInterfaces
 {
     public interface IOrderService
     {
         Task<OrderEntity?> CreateNewOrderAsync(OrderDto request);
+        Task OrderProduceAsync(OrderEntity order);
     }
 }

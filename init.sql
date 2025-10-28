@@ -23,7 +23,7 @@ CREATE TABLE Products (
     ProductImageUrl VARCHAR(500)
 );
 
-INSERT INTO Products (ProductName, ProductCategory, ProductDescription, ProductPrice, ProductQuantity, ProductImageUrl)
+INSERT INTO Products (ProductName, ProductDescription, ProductCategory, ProductPrice, ProductQuantity, ProductImageUrl)
 VALUES
 -- Laptops (15)
 ('UltraBook X1', 'Lightweight and powerful laptop for professionals.', 'Laptops', 1299.99, 100, 'hello'),

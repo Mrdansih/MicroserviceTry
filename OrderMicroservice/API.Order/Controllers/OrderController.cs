@@ -1,6 +1,5 @@
 ﻿using Application.Order.ServiceInterfaces;
 using Domain.Order.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Order.Controllers
@@ -11,7 +10,7 @@ namespace API.Order.Controllers
     {
         private readonly IOrderService _orderService;
 
-        public OrderController(IOrderService orderService) 
+        public OrderController(IOrderService orderService)
         {
             _orderService = orderService;
         }
@@ -24,7 +23,7 @@ namespace API.Order.Controllers
 
             var order = await _orderService.CreateNewOrderAsync(request);
             if (order == null)
-                return BadRequest(new { Succes = false, Message = "An error occured"});
+                return BadRequest(new { Succes = false, Message = "An error occured" });
 
             return Ok(new { Succes = true, Message = "Order added succesfully" });
         }
