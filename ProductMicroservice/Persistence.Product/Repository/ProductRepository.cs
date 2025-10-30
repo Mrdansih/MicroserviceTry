@@ -38,5 +38,12 @@ namespace Persistence.Product.Repository
             await _context.SaveChangesAsync();
             return product;
         }
+
+        public async Task UpdateProductQuantityAsync(ProductEntity product, int newQuantity)
+        {
+            product.ProductQuantity = newQuantity;
+            _context.Products.Update(product);
+            await _context.SaveChangesAsync();
+        }
     }
 }

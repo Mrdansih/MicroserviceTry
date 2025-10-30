@@ -4,14 +4,6 @@ CREATE TABLE Users (
     PasswordHash VARCHAR(200) NOT NULL
 );
 
-CREATE TABLE Orders (
-    Id INT AUTO_INCREMENT PRIMARY KEY,
-    ProductId INT NOT NULL,
-    CustomerName VARCHAR(50),
-    Quantity INT NOT NULL,
-    OrderDate DATETIME NOT NULL,
-    FOREIGN KEY (ProductId) REFERENCES Products(Id)
-);
 
 CREATE TABLE Products (
     Id INT AUTO_INCREMENT PRIMARY KEY,
@@ -21,6 +13,15 @@ CREATE TABLE Products (
     ProductPrice DECIMAL(10,2) NOT NULL,
     ProductQuantity INT NOT NULL,
     ProductImageUrl VARCHAR(500)
+);
+
+CREATE TABLE Orders (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    ProductId INT NOT NULL,
+    CustomerName VARCHAR(50),
+    Quantity INT NOT NULL,
+    OrderDate DATETIME NOT NULL,
+    FOREIGN KEY (ProductId) REFERENCES Products(Id)
 );
 
 INSERT INTO Products (ProductName, ProductDescription, ProductCategory, ProductPrice, ProductQuantity, ProductImageUrl)

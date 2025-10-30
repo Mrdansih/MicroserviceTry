@@ -1,6 +1,7 @@
 ﻿using Application.Order.RepositoryInterfaces;
 using Application.Order.ServiceInterfaces;
 using Confluent.Kafka;
+using Domain.Order.Contracts;
 using Domain.Order.Models;
 using System.Text.Json;
 
@@ -36,10 +37,12 @@ namespace Application.Order.Services
 
         public async Task OrderProduceAsync(OrderEntity order)
         {
+            var orderEvent = new OrderCreatedEvent(order.ProductId, order.Quantity);
+
             await _eventPublisher.ProduceAsync("order-topic", new Message<string, string>
             {
                 Key = order.Id.ToString(),
-                Value = JsonSerializer.Serialize(order)
+                Value = JsonSerializer.Serialize(orderEvent)
             });
         }
     }

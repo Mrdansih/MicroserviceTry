@@ -1,4 +1,5 @@
 using Application.Product;
+using Application.Product.Services;
 using Persistence.Product;
 
 namespace API.Product
@@ -12,6 +13,8 @@ namespace API.Product
             // Add services to the container.
 
             builder.Services.AddControllers();
+
+            builder.Services.AddHostedService<StockUpdateConsumer>();
 
             builder.Services.AddApplication();
             builder.Services.AddPersistence(builder.Configuration);
