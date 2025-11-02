@@ -27,7 +27,7 @@ namespace Application.Product.Services
             var config = new ConsumerConfig
             {
                 GroupId = "order-group",
-                BootstrapServers = "localhost:9092",
+                BootstrapServers = "kafka:9092",
                 AutoOffsetReset = AutoOffsetReset.Earliest
             };
             using var consumer = new ConsumerBuilder<string, string>(config).Build();
