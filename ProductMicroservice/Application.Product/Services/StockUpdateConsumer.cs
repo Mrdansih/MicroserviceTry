@@ -4,49 +4,71 @@ using Domain.Product.Contracts;
 using Microsoft.Extensions.Hosting;
 using System.Text.Json;
 
-namespace Application.Product.Services
+public class StockUpdateConsumer : BackgroundService
 {
-    public class StockUpdateConsumer : BackgroundService
+    private readonly IProductRepository _repository;
+
+    public StockUpdateConsumer(IProductRepository repository)
     {
-        private readonly IProductRepository _repository;
+        _repository = repository;
+    }
 
-        public StockUpdateConsumer(IProductRepository repository)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        var config = new ConsumerConfig
         {
-            _repository = repository;
+            GroupId = "order-group",
+            BootstrapServers = "kafka:9092",
+            AutoOffsetReset = AutoOffsetReset.Earliest,
+            EnableAutoCommit = true
+        };
+
+        using var consumer = new ConsumerBuilder<string, string>(config).Build();
+
+        // Retry until Kafka is ready
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            try
+            {
+                consumer.Subscribe("order-topic");
+                break;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Waiting for Kafka: {ex.Message}");
+                await Task.Delay(5000, stoppingToken);
+            }
         }
-        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+
+        // Consume messages
+        while (!stoppingToken.IsCancellationRequested)
         {
-            return Task.Run(() =>
+            try
             {
-                _ = ConsumeAsync("order-topic", stoppingToken);
-            }, stoppingToken);
-        }
+                var result = consumer.Consume(stoppingToken);
+                var order = JsonSerializer.Deserialize<OrderCreatedEvent>(result.Message.Value);
 
-        public async Task ConsumeAsync(string topic, CancellationToken stoppingToken)
-        {
-            var config = new ConsumerConfig
-            {
-                GroupId = "order-group",
-                BootstrapServers = "kafka:9092",
-                AutoOffsetReset = AutoOffsetReset.Earliest
-            };
-            using var consumer = new ConsumerBuilder<string, string>(config).Build();
-            consumer.Subscribe(topic);
-
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                var consumerResult = consumer.Consume(stoppingToken);
-
-                var order = JsonSerializer.Deserialize<OrderCreatedEvent>(consumerResult.Message.Value);
+                if (order == null)
+                {
+                    Console.WriteLine("Failed to deserialize message.");
+                    continue;
+                }
 
                 var product = await _repository.GetProductByIdAsync(order.ProductId);
                 if (product != null)
                 {
-                    var newQuantity = product.ProductQuantity -= order.Quantity;
+                    var newQuantity = product.ProductQuantity - order.Quantity;
                     await _repository.UpdateProductQuantityAsync(product, newQuantity);
+                    Console.WriteLine($"Updated ProductId={product.Id} stock to {newQuantity}");
                 }
             }
-            consumer.Close();
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error processing message: {ex.Message}");
+                await Task.Delay(1000, stoppingToken);
+            }
         }
+
+        consumer.Close();
     }
 }
