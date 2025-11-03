@@ -6,6 +6,7 @@ namespace Application.Order.Services
     public class OrderEventPublisher : IOrderEventPublisher
     {
         private readonly IProducer<string, string> _producer;
+
         public OrderEventPublisher()
         {
             var config = new ConsumerConfig
