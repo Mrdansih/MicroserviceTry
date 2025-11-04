@@ -1,4 +1,5 @@
 ﻿using Application.Product.RepositoryInterfaces;
+using Application.Product.ServiceInterfaces;
 using Confluent.Kafka;
 using Domain.Product.Contracts;
 using Microsoft.Extensions.Hosting;
@@ -7,10 +8,12 @@ using System.Text.Json;
 public class StockUpdateConsumer : BackgroundService
 {
     private readonly IProductRepository _repository;
+    private readonly IStockEventProducer _stockEventProducer;
 
-    public StockUpdateConsumer(IProductRepository repository)
+    public StockUpdateConsumer(IProductRepository repository, IStockEventProducer stockEventProducer)
     {
         _repository = repository;
+        _stockEventProducer = stockEventProducer;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -55,12 +58,29 @@ public class StockUpdateConsumer : BackgroundService
                 }
 
                 var product = await _repository.GetProductByIdAsync(order.ProductId);
-                if (product != null)
+                if (product == null)
                 {
-                    var newQuantity = product.ProductQuantity - order.Quantity;
-                    await _repository.UpdateProductQuantityAsync(product, newQuantity);
-                    Console.WriteLine($"Updated ProductId={product.Id} stock to {newQuantity}");
+                    Console.WriteLine("Product was not found");
+                    continue;
                 }
+
+                if (order.Quantity > product.ProductQuantity)
+                {
+                    Console.WriteLine($"[ProductService] Not enough stock for Product {order.ProductId}");
+                    var stockEvent = new StockUnavailableEvent
+                    {
+                        ProductId = order.ProductId,
+                        RequstedQuantity = order.Quantity,
+                        AvailableQuantity = product.ProductQuantity
+                    };
+
+                    await _stockEventProducer.PublishStockUnavailableAsync(stockEvent);
+                    continue;
+                }
+
+                var newQuantity = product.ProductQuantity - order.Quantity;
+                await _repository.UpdateProductQuantityAsync(product, newQuantity);
+                Console.WriteLine($"Updated ProductId={product.Id} stock to {newQuantity}");
             }
             catch (Exception ex)
             {

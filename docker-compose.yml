@@ -37,7 +37,6 @@ services:
         usersdb:
           condition: service_healthy
 
-  
   orderservice:
        build:
          context: ./OrderMicroservice

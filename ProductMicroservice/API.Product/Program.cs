@@ -14,8 +14,6 @@ namespace API.Product
 
             builder.Services.AddControllers();
 
-            builder.Services.AddHostedService<StockUpdateConsumer>();
-
             builder.Services.AddApplication();
             builder.Services.AddPersistence(builder.Configuration);
 
