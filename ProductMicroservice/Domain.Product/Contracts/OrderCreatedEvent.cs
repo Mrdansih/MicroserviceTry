@@ -6,4 +6,4 @@ using System.Threading.Tasks;
 
 namespace Domain.Product.Contracts;
 
-public record OrderCreatedEvent(int ProductId, int Quantity);
+public record OrderCreatedEvent(int orderId, int ProductId, int Quantity);

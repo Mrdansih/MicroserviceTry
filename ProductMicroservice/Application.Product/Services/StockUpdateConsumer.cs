@@ -8,12 +8,10 @@ using System.Text.Json;
 public class StockUpdateConsumer : BackgroundService
 {
     private readonly IProductRepository _repository;
-    private readonly IStockEventProducer _stockEventProducer;
 
-    public StockUpdateConsumer(IProductRepository repository, IStockEventProducer stockEventProducer)
+    public StockUpdateConsumer(IProductRepository repository)
     {
         _repository = repository;
-        _stockEventProducer = stockEventProducer;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -61,20 +59,6 @@ public class StockUpdateConsumer : BackgroundService
                 if (product == null)
                 {
                     Console.WriteLine("Product was not found");
-                    continue;
-                }
-
-                if (order.Quantity > product.ProductQuantity)
-                {
-                    Console.WriteLine($"[ProductService] Not enough stock for Product {order.ProductId}");
-                    var stockEvent = new StockUnavailableEvent
-                    {
-                        ProductId = order.ProductId,
-                        RequstedQuantity = order.Quantity,
-                        AvailableQuantity = product.ProductQuantity
-                    };
-
-                    await _stockEventProducer.PublishStockUnavailableAsync(stockEvent);
                     continue;
                 }
 

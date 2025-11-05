@@ -37,7 +37,7 @@ namespace Application.Order.Services
 
         public async Task OrderProduceAsync(OrderEntity order)
         {
-            var orderEvent = new OrderCreatedEvent(order.ProductId, order.Quantity);
+            var orderEvent = new OrderCreatedEvent(order.Id, order.ProductId, order.Quantity);
 
             await _eventPublisher.ProduceAsync("order-topic", new Message<string, string>
             {
