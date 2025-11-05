@@ -29,6 +29,20 @@ namespace API.Product.Controllers
             return Ok(new { Succes = true, Message = "Product added succesfully" });
         }
 
+        [HttpGet("{id}/check")]
+        public async Task<IActionResult> CheckStockAsync(int id, [FromQuery] int quantity)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            var stockCheck = await _productService.StockCheckAsync(id, quantity);
+
+            if (stockCheck == null)
+                return NotFound();
+
+            return Ok(stockCheck);
+        }
+
         [HttpGet("get/{id}")]
         public async Task<ActionResult<ProductDto>> GetProductAsync(int id)
         {
