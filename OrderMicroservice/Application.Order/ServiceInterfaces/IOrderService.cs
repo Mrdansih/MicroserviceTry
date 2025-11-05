@@ -1,10 +1,11 @@
-﻿using Domain.Order.Models;
+﻿using Domain.Order.Contracts;
+using Domain.Order.Models;
 
 namespace Application.Order.ServiceInterfaces
 {
     public interface IOrderService
     {
-        Task<OrderEntity?> CreateNewOrderAsync(OrderDto request);
+        Task<CreateOrderResult?> CreateNewOrderAsync(OrderDto request);
         Task OrderProduceAsync(OrderEntity order);
     }
 }

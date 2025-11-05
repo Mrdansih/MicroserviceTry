@@ -11,6 +11,11 @@ namespace Application.Order
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IOrderEventPublisher, OrderEventPublisher>();
 
+            services.AddHttpClient("ProductService", c =>
+            {
+                c.BaseAddress = new Uri("http://productservice:5002");
+            });
+
             return services;
         }
     }

@@ -22,10 +22,10 @@ namespace API.Order.Controllers
                 return BadRequest(new { Succes = false, Message = "Invalid request" });
 
             var order = await _orderService.CreateNewOrderAsync(request);
-            if (order == null)
-                return BadRequest(new { Succes = false, Message = "An error occured" });
+            if (order!.Succes == false)
+                return BadRequest(new { order.Succes, order.Message });
 
-            return Ok(new { Succes = true, Message = "Order added succesfully" });
+            return Ok(new { order.Succes, order.Message});
         }
     }
 }
