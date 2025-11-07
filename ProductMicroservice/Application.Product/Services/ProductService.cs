@@ -1,5 +1,6 @@
 ﻿using Application.Product.RepositoryInterfaces;
 using Application.Product.ServiceInterfaces;
+using Domain.Product.ApiResponses;
 using Domain.Product.ProductModels;
 
 namespace Application.Product.Services
@@ -34,6 +35,7 @@ namespace Application.Product.Services
             product.ProductDescription = request.ProductDescription;
             product.ProductCategory = request.ProductCategory;
             product.ProductPrice = request.ProductPrice;
+            product.ProductQuantity = request.ProductQuantity;
             product.ProductImageUrl = request.ProductImageUrl;
 
             var createdProduct = await _productRepository.AddProductAsync(product);
@@ -54,6 +56,22 @@ namespace Application.Product.Services
         {
             var products = await _productRepository.GetProductsForPageAsync(page, pageSize, category);
             return ProductMapper.ToDtoList(products);
+        }
+
+        public async Task<StockCheckResponse?> StockCheckAsync(int productId, int quantity)
+        {
+            var product = await _productRepository.GetProductByIdAsync(productId);
+            if (product == null)
+                return null;
+
+            bool available = product.ProductQuantity >= quantity;
+
+            return new StockCheckResponse 
+            {
+                ProductId = productId,
+                Available = available,
+                CurrentStock = product.ProductQuantity
+            };
         }
     }
 }

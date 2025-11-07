@@ -1,12 +1,12 @@
-﻿using Domain.Product.ProductModels;
+﻿using Domain.Order.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Persistence.Product
+namespace Persistence.Order
 {
     public class AppDbContext : DbContext
     {
         public AppDbContext(DbContextOptions options) : base(options) { }
 
-        public DbSet<ProductEntity> Products => Set<ProductEntity>();
+        public DbSet<OrderEntity> Orders => Set<OrderEntity>();
     }
 }

@@ -1,6 +1,5 @@
 ﻿using Application.Product.ServiceInterfaces;
 using Domain.Product.ProductModels;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Product.Controllers
@@ -28,6 +27,20 @@ namespace API.Product.Controllers
                 return BadRequest(new { Succes = false, Message = "Product with that name already exists" });
 
             return Ok(new { Succes = true, Message = "Product added succesfully" });
+        }
+
+        [HttpGet("{id}/check")]
+        public async Task<IActionResult> CheckStockAsync(int id, [FromQuery] int quantity)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            var stockCheck = await _productService.StockCheckAsync(id, quantity);
+
+            if (stockCheck == null)
+                return NotFound();
+
+            return Ok(stockCheck);
         }
 
         [HttpGet("get/{id}")]

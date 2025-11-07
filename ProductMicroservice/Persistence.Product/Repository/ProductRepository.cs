@@ -1,11 +1,6 @@
 ﻿using Application.Product.RepositoryInterfaces;
 using Domain.Product.ProductModels;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Persistence.Product.Repository
 {
@@ -42,6 +37,13 @@ namespace Persistence.Product.Repository
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
             return product;
+        }
+
+        public async Task UpdateProductQuantityAsync(ProductEntity product, int newQuantity)
+        {
+            product.ProductQuantity = newQuantity;
+            _context.Products.Update(product);
+            await _context.SaveChangesAsync();
         }
     }
 }

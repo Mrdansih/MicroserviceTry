@@ -1,10 +1,10 @@
-﻿using Application.Product.RepositoryInterfaces;
+﻿using Application.Order.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Persistence.Product.Repository;
+using Persistence.Order.Repositories;
 
-namespace Persistence.Product
+namespace Persistence.Order
 {
     public static class DependencyInjection
     {
@@ -15,7 +15,7 @@ namespace Persistence.Product
             services.AddDbContext<AppDbContext>(options =>
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
-            services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<IOrderRepository, OrderRepository>();
 
             return services;
         }

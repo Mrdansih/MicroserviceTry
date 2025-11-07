@@ -1,12 +1,15 @@
 services:
+
+# Gateway stuff
+
   gateway:
     build: ./Gateway
     environment:
       - ASPNETCORE_URLS=http://+:5000
     ports:
       - "8080:5000"
-    # depends_on:
-    #   - authservice
+
+# Microservice stuff
 
   authservice:
       build:
@@ -18,7 +21,8 @@ services:
         - ASPNETCORE_URLS=http://+:5001
         - ConnectionStrings__Default=server=usersdb;port=3306;user=root;password=root;database=usersdb
       depends_on:
-        - usersdb
+         usersdb:
+           condition: service_healthy
     
   productservice:
       build:
@@ -30,13 +34,62 @@ services:
         - ASPNETCORE_URLS=http://+:5002
         - ConnectionStrings__Default=server=usersdb;port=3306;user=root;password=root;database=usersdb
       depends_on:
-       - usersdb
+        usersdb:
+          condition: service_healthy
+
+  orderservice:
+       build:
+         context: ./OrderMicroservice
+         dockerfile: DockerfileOrder
+       deploy:
+           replicas: 1
+       environment:
+         - ASPNETCORE_URLS=http://+:5003
+         - ConnectionStrings__Default=server=usersdb;port=3306;user=root;password=root;database=usersdb
+       depends_on:
+         usersdb:
+           condition: service_healthy
   
+# Database stuff
+
   usersdb:
     image: mysql:8.0
-    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: usersdb
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3306:3306"     
+    healthcheck:
+      test: ["CMD-SHELL", "mysql -h127.0.0.1 -uroot -proot --protocol=tcp -e 'SELECT 1;'"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+# Kafka stuff
+
+  zoo:
+    image: confluentinc/cp-zookeeper:7.5.0
+    hostname: zoo
+    container_name: zoo
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    hostname: kafka
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zoo:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    depends_on:
+      - zoo

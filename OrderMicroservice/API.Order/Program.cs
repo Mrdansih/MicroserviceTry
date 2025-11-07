@@ -1,8 +1,7 @@
-using Application.Product;
-using Application.Product.Services;
-using Persistence.Product;
+using Application.Order;
+using Persistence.Order;
 
-namespace API.Product
+namespace API.Order
 {
     public class Program
     {
