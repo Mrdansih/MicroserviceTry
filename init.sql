@@ -1,7 +1,10 @@
 CREATE TABLE Users (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     Username VARCHAR(100) NOT NULL UNIQUE,
-    PasswordHash VARCHAR(200) NOT NULL
+    PasswordHash VARCHAR(200) NOT NULL,
+    UserRole VARCHAR(50),
+    RefreshToken VARCHAR(200),
+    RefreshTokenExpiryTime DATETIME
 );
 
 

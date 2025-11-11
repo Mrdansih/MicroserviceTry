@@ -1,5 +1,6 @@
 ﻿using Application.Auth.ServiceInterfaces;
-using Domain.Auth.UserModels;
+using Application.Auth.Dtos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Auth.Controllers
@@ -30,19 +31,33 @@ namespace API.Auth.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<string>> PostUserLoginAsync([FromBody] UserDto request)
+        public async Task<ActionResult<TokenResponseDto>> PostUserLoginAsync([FromBody] UserDto request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new { Success = false, Message = "Invalid request" });
 
-            var token = await _userService.ValidateLoginAsync(request);
+            var result = await _userService.ValidateLoginAsync(request);
 
-            if (token is null)
+            if (result is null)
             {
                 return Unauthorized(new { Success = false, Message = "Invalid username or password." });
             }
 
-            return Ok(new { Success = true, Message = "Login succesful", token });
+            return Ok(new { Success = true, Message = "Login succesful", result });
+        }
+
+        [Authorize]
+        [HttpGet]
+        public IActionResult AuthenticatedOnlyEndpoint()
+        {
+            return Ok("you are authenticated!");
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("admin-only")]
+        public IActionResult AdminOnlyEndpoint()
+        {
+            return Ok("you are an admin!");
         }
     }
 }
