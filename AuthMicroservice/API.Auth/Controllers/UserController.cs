@@ -30,19 +30,19 @@ namespace API.Auth.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> PostUserLoginAsync([FromBody] UserDto request)
+        public async Task<ActionResult<string>> PostUserLoginAsync([FromBody] UserDto request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new { Success = false, Message = "Invalid request" });
 
-            var user = await _userService.ValidateLoginAsync(request);
+            var token = await _userService.ValidateLoginAsync(request);
 
-            if (user is false)
+            if (token is null)
             {
                 return Unauthorized(new { Success = false, Message = "Invalid username or password." });
             }
 
-            return Ok(new { Success = true, Message = "Login succesful" });
+            return Ok(new { Success = true, Message = "Login succesful", token });
         }
     }
 }
