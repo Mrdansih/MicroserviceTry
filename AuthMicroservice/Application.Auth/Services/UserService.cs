@@ -22,14 +22,6 @@ namespace Application.Auth.Services
             _configuration = configuration;
         }
 
-        private async Task<User?> GetUserByUsernameAsync(string? username)
-        {
-            if (!String.IsNullOrEmpty(username))
-                return await _userRepository.GetUserAsync(username);
-
-            return null;
-        }
-
         public async Task<User?> RegisterUserAsync(UserDto request)
         {
             var user = new User();
@@ -61,18 +53,35 @@ namespace Application.Auth.Services
                 return null;
             }
 
-            var response = new TokenResponseDto
+            return await CreateTokenResponse(user);
+        }
+
+        public async Task<TokenResponseDto?> RefreshTokensAsync(RefreshTokenRequestDto request)
+        {
+            var user = await ValidateRefreshTokenAsync(request.UserId, request.RefreshToken);
+            if (user is null)
+                return null;
+
+            return await CreateTokenResponse(user);
+        }
+
+        private async Task<User?> GetUserByUsernameAsync(string? username)
+        {
+            if (!String.IsNullOrEmpty(username))
+                return await _userRepository.GetUserAsync(username);
+
+            return null;
+        }
+
+        private async Task<TokenResponseDto> CreateTokenResponse(User user)
+        {
+            return new TokenResponseDto
             {
                 AccessToken = CreateJwtToken(user),
                 RefreshToken = await GenerateAndSaveRefreshTokenAsync(user)
             };
-            return response;
         }
 
-        public Task<TokenResponseDto?> RefreshTokensAsync(RefreshTokenRequestDto request)
-        {
-            throw new NotImplementedException();
-        }
 
         private async Task<User?> ValidateRefreshTokenAsync(int userId, string refreshToken)
         {
