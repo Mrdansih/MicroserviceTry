@@ -12,20 +12,13 @@ using System.Security.Cryptography;
 
 namespace Application.Auth.Services
 {
-    public class UserService : IUserService
+    public class UserService(IUserRepository userRepository, IConfiguration configuration)
+        : IUserService
     {
-        private readonly IUserRepository _userRepository;
-        private readonly IConfiguration _configuration;
-        public UserService(IUserRepository userRepository, IConfiguration configuration)
-        {
-            _userRepository = userRepository;
-            _configuration = configuration;
-        }
-
         private async Task<User?> GetUserByUsernameAsync(string? username)
         {
-            if (!String.IsNullOrEmpty(username))
-                return await _userRepository.GetUserAsync(username);
+            if (!string.IsNullOrEmpty(username))
+                return await userRepository.GetUserAsync(username);
 
             return null;
         }
@@ -43,8 +36,9 @@ namespace Application.Auth.Services
 
             user.Username = request.Username;
             user.PasswordHash = hashedPassword;
+            user.UserRole = "User";
 
-            var createdUser = await _userRepository.RegisterHashedUserAsync(user);
+            var createdUser = await userRepository.RegisterHashedUserAsync(user);
             return createdUser;
         }
 
@@ -76,14 +70,14 @@ namespace Application.Auth.Services
 
         private async Task<User?> ValidateRefreshTokenAsync(int userId, string refreshToken)
         {
-            var user = await _userRepository.GetUserByIdAsync(userId);
+            var user = await userRepository.GetUserByIdAsync(userId);
             if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
                 return null;
 
             return user;
         }
 
-        private string GenerateRefreshToken()
+        private static string GenerateRefreshToken()
         {
             var randomNumber = new byte[32];
             using var rng = RandomNumberGenerator.Create();
@@ -96,7 +90,7 @@ namespace Application.Auth.Services
             var refreshToken = GenerateRefreshToken();
             user.RefreshToken = refreshToken;
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
-            await _userRepository.SaveRefreshTokenAsync(user);
+            await userRepository.SaveRefreshTokenAsync(user);
             return refreshToken;
         }
 
@@ -109,13 +103,13 @@ namespace Application.Auth.Services
                 new Claim(ClaimTypes.Role, user.UserRole!)
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetValue<string>("AppSettings:Token")!));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetValue<string>("AppSettings:Token")!));
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512);
 
             var tokenDescriptor = new JwtSecurityToken(
-                issuer: _configuration.GetValue<string>("AppSettings:Issuer"),
-                audience: _configuration.GetValue<string>("AppSettings:Audience"),
+                issuer: configuration.GetValue<string>("AppSettings:Issuer"),
+                audience: configuration.GetValue<string>("AppSettings:Audience"),
                 claims: claims,
                 expires: DateTime.UtcNow.AddHours(2),
                 signingCredentials: creds
