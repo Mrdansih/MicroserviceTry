@@ -1,5 +1,5 @@
 ﻿using Application.Auth.RepositoryInterfaces;
-using Domain.Auth.UserModels;
+using Domain.Auth.UserModel;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.Auth.Repository
@@ -17,11 +17,21 @@ namespace Persistence.Auth.Repository
             return await _context.Users.Where(u => u.Username == username).FirstOrDefaultAsync();
         }
 
+        public async Task<User?> GetUserByIdAsync(int userId)
+        {
+            return await _context.Users.FindAsync(userId);
+        }
+
         public async Task<User> RegisterHashedUserAsync(User user)
         {
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
             return user;
+        }
+
+        public async Task SaveRefreshTokenAsync(User user)
+        {
+            await _context.SaveChangesAsync();
         }
     }
 }

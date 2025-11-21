@@ -1,4 +1,4 @@
-﻿using Domain.Auth.UserModels;
+﻿using Domain.Auth.UserModel;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.Auth

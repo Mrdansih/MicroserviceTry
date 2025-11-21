@@ -1,5 +1,6 @@
 ﻿using Application.Auth.ServiceInterfaces;
-using Domain.Auth.UserModels;
+using Application.Auth.Dtos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Auth.Controllers
@@ -30,19 +31,43 @@ namespace API.Auth.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> PostUserLoginAsync([FromBody] UserDto request)
+        public async Task<ActionResult<TokenResponseDto>> PostUserLoginAsync([FromBody] UserDto request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new { Success = false, Message = "Invalid request" });
 
-            var user = await _userService.ValidateLoginAsync(request);
+            var result = await _userService.ValidateLoginAsync(request);
 
-            if (user is false)
+            if (result is null)
             {
                 return Unauthorized(new { Success = false, Message = "Invalid username or password." });
             }
 
-            return Ok(new { Success = true, Message = "Login succesful" });
+            return Ok(new { Success = true, Message = "Login succesful", result });
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<ActionResult<TokenResponseDto>> RefreshToken(RefreshTokenRequestDto request)
+        {
+            var result = await _userService.RefreshTokensAsync(request);
+            if (result is null || result.AccessToken is null || result.RefreshToken is null)
+                return Unauthorized("Invalid refresh token");
+
+            return Ok(result);
+        }
+
+        [Authorize]
+        [HttpGet]
+        public IActionResult AuthenticatedOnlyEndpoint()
+        {
+            return Ok("you are authenticated!");
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("admin-only")]
+        public IActionResult AdminOnlyEndpoint()
+        {
+            return Ok("you are an admin!");
         }
     }
 }
